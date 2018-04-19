@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -118,6 +120,62 @@ namespace JDK_Deploy
             msg = xn.InnerText;
             VariateRegHelp.SetEnvironment(Variate.Sys, "PATH", msg);
             MessageBox.Show("环境变量已成功还原！", "还原成功!", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            WindowsIdentity current = WindowsIdentity.GetCurrent();
+            WindowsPrincipal windowsPrincipal = new WindowsPrincipal(current);
+            //WindowsBuiltInRole可以枚举出很多权限，例如系统用户、User、Guest等等  
+            if (windowsPrincipal.IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                string jdkpath = GetJdkPath();
+                if(MessageBox.Show("您的JDK是否安装于以下路径\n" + jdkpath, "确认路径", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    textBox1.Text = jdkpath;
+                }
+            }
+            else
+            {
+                MessageBox.Show("读取环境变量失败！\n请给予管理员权限.", "权限不足!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Environment.Exit(0);
+            }
+        }
+
+        /// <summary>
+        /// 从注册表中读取JDK的安装路径
+        /// </summary>
+        /// <returns></returns>
+        private string GetJdkPath()
+        {
+            RegistryKey currentKey = null;
+            string displayName = null, InstallLocation = null;
+            RegistryKey software = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            software = software.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
+            try
+            {
+                foreach (string item in software.GetSubKeyNames())
+                {
+                    currentKey = software.OpenSubKey(item);
+                    displayName = (string)currentKey.GetValue("DisplayName");
+                    if (displayName == null)
+                    {
+                        continue;
+                    }
+                    if (displayName.Contains(@"Java SE Development"))
+                    {
+                        InstallLocation = (string)currentKey.GetValue("InstallLocation");
+                        InstallLocation = InstallLocation.Substring(0, InstallLocation.Length-1);
+                        return InstallLocation;
+                    }
+                }
+                return InstallLocation;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

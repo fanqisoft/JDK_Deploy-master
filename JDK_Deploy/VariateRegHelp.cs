@@ -112,7 +112,8 @@ namespace JDK_Deploy
                         return;
                     }
                 }
-                SetEnvironment(type,"JAVA_HOME", javaHome + jdkpath + ";");
+                //SetEnvironment(type,"JAVA_HOME", javaHome + jdkpath + ";");
+                SetEnvironment(type, "JAVA_HOME", jdkpath + ";");
 
             }
             else //如果不存在
