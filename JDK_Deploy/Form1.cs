@@ -104,22 +104,28 @@ namespace JDK_Deploy
         {
             string fileName = string.Empty;
             openFileDialog1.InitialDirectory = System.Environment.CurrentDirectory;
+            openFileDialog1.FileName = "";
             openFileDialog1.Filter = "XML文件|*.xml";
             openFileDialog1.RestoreDirectory = true;
             openFileDialog1.FilterIndex = 1;
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 fileName = openFileDialog1.FileName;
+                XmlDocument doc = new XmlDocument();
+                doc.Load(fileName);
+                XmlNode xn = doc.SelectSingleNode("/Variate/User/path");
+                string msg = xn.InnerText;
+                VariateRegHelp.SetEnvironment(Variate.User, "PATH", msg);
+                xn = doc.SelectSingleNode("/Variate/Sys/path");
+                msg = xn.InnerText;
+                VariateRegHelp.SetEnvironment(Variate.Sys, "PATH", msg);
+                MessageBox.Show("环境变量已成功还原！", "还原成功!", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
-            XmlDocument doc = new XmlDocument();
-            doc.Load(fileName);
-            XmlNode xn = doc.SelectSingleNode("/Variate/User/path");
-            string msg = xn.InnerText;
-            VariateRegHelp.SetEnvironment(Variate.User, "PATH", msg);
-            xn = doc.SelectSingleNode("/Variate/Sys/path");
-            msg = xn.InnerText;
-            VariateRegHelp.SetEnvironment(Variate.Sys, "PATH", msg);
-            MessageBox.Show("环境变量已成功还原！", "还原成功!", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            else
+            {
+                return;
+            }
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
