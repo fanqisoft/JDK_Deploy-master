@@ -70,6 +70,24 @@ namespace JDK_Deploy
             OpenEnvironmentReg(type).SetValue(name, strValue);
 
         }
+        /// <summary>
+        /// 移除指定的环境变量
+        /// </summary>
+        /// <param name="type">枚举环境变量</param>
+        /// <param name="name">变量名称</param>
+        public static void RemoveEnvironment(Variate type, string name)
+        {
+            try
+            {
+                OpenEnvironmentReg(type).DeleteValue(name);
+            }
+            catch (Exception)
+            {
+
+                return;
+            }
+            
+        }
 
         /// <summary>
         /// 检测指定的环境变量是否存在指定变量
@@ -177,6 +195,54 @@ namespace JDK_Deploy
             {
                 SetEnvironment(type, "CLASSPATH", path + ";");
             }
+        }
+
+        /// <summary>
+        /// 移除指定环境变量JavaHome && ClassPath
+        /// </summary>
+        /// <param name="type"></param>
+        public static void RemoveJavaHomeAndClassPath(Variate type)
+        {
+            RemoveEnvironment(type, "JAVA_HOME");
+            RemoveEnvironment(type, "CLASSPATH");
+        }
+        public static void RemovePathAppend(Variate type)
+        {
+            string pathlist;
+            pathlist = GetEnvironmentByName(type, "PATH");
+            //检测是否以;结尾
+            if (pathlist.Substring(pathlist.Length - 1, 1) != ";")
+            {
+                SetEnvironment(type, "PATH", pathlist + ";");
+                pathlist = GetEnvironmentByName(type, "PATH");
+            }
+            List<string> list = pathlist.Split(';').ToList();
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                if (list[i].ToUpper() == @"%JAVA_HOME%\bin".ToUpper())
+                {
+                    list.Remove(list[i]);
+                    continue;
+                }
+                if (list[i].ToUpper() == @"%JAVA_HOME%\jre\bin".ToUpper())
+                {
+                    list.Remove(list[i]);
+                    continue;
+                }
+            }
+            pathlist = "";
+            foreach (var item in list)
+            {
+                if(list.IndexOf(item) == list.Count() - 1)
+                {
+                    pathlist += item;
+                }
+                else
+                {
+                    pathlist += item + ";";
+                }
+            }
+            SetEnvironment(type, "PATH", pathlist);
         }
     }
 }

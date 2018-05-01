@@ -183,5 +183,23 @@ namespace JDK_Deploy
                 throw;
             }
         }
+        /// <summary>
+        /// 移除JDK变量
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button6_Click(object sender, EventArgs e)
+        {
+            if (radioButton1.Checked)
+            {
+                VariateRegHelp.RemoveJavaHomeAndClassPath(Variate.Sys);
+                VariateRegHelp.RemovePathAppend(Variate.Sys);
+            }
+            if (radioButton2.Checked)
+            {
+                VariateRegHelp.RemoveJavaHomeAndClassPath(Variate.User);
+                VariateRegHelp.RemovePathAppend(Variate.User);
+            }            
+        }
     }
 }
